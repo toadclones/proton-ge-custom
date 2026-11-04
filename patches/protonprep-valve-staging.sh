@@ -372,6 +372,9 @@ apply_all_in_dir() {
     echo "WINE: -GAME FIXES- add and start an lsass.exe SamSs service stub for ACE anti-cheat"
     apply_patch "../patches/game-patches/ace-lsass-samss-service-stub.patch"
     apply_patch "../patches/game-patches/ace-wineboot-start-samss-service.patch"
+    
+    echo "WINE: -GAME FIXES- Fix wow fullscreen issue"
+    apply_patch "../patches/game-patches/wow-gnome-fullscreen-fix.patch"
 
 ### END GAME PATCH SECTION ###
 

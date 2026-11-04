@@ -1,0 +1,25 @@
+--- a/dlls/winex11.drv/window.c
++++ b/dlls/winex11.drv/window.c
+@@ -3781,9 +3781,20 @@
+     }
+ 
+     window_set_wm_state( data, get_desired_wm_state( new_style, new_rects ), activate );
+-    if (!data->wm_state_serial && data->pending_state.wm_state != WithdrawnState)
++    if (data->pending_state.wm_state != WithdrawnState)
+     {
+-        if (swp_flags & (SWP_FRAMECHANGED | SWP_STATECHANGED)) set_wm_hints( data );
++        /* WM_HINTS itself has to wait for a pending WM_STATE request, because it takes part
++         * in that handshake. The desired state bookkeeping and the size hints don't:
++         * window_set_net_wm_state() only records the desired state while a request is
++         * pending, and the WM needs gravity-only hints for the window before it answers
++         * the delayed configure request. Otherwise a window that switches to fullscreen
++         * right after being mapped loses FULLSCREEN when WM_STATE completes, or keeps the
++         * stale fixed-size hints and gets sized to those instead of the monitor. */
++        if (swp_flags & (SWP_FRAMECHANGED | SWP_STATECHANGED))
++        {
++            if (data->wm_state_serial) set_size_hints( data, new_style );
++            else set_wm_hints( data );
++        }
+         update_net_wm_states( data );
+     }
+ 
